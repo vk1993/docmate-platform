@@ -1,7 +1,0 @@
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/availability-service/src/main/java/com/docmate/availability/controller/AvailabilityController.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/availability-service/src/main/java/com/docmate/availability/controller/DoctorAvailabilityController.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/availability-service/src/main/java/com/docmate/availability/AvailabilityServiceApplication.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/availability-service/src/main/java/com/docmate/availability/repository/DoctorRecurringAvailabilityRepository.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/availability-service/src/main/java/com/docmate/availability/service/AvailabilityService.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/availability-service/src/main/java/com/docmate/availability/repository/DoctorAdhocAvailabilityRepository.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/availability-service/src/main/java/com/docmate/availability/config/SecurityConfig.java

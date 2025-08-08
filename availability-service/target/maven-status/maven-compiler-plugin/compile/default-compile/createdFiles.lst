@@ -1,7 +1,0 @@
-com/docmate/availability/controller/DoctorAvailabilityController.class
-com/docmate/availability/repository/DoctorRecurringAvailabilityRepository.class
-com/docmate/availability/service/AvailabilityService.class
-com/docmate/availability/config/SecurityConfig.class
-com/docmate/availability/AvailabilityServiceApplication.class
-com/docmate/availability/repository/DoctorAdhocAvailabilityRepository.class
-com/docmate/availability/controller/AvailabilityController.class
