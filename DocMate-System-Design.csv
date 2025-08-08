@@ -1,0 +1,185 @@
+# DocMate Platform - System Design Documentation
+# Generated on: August 8, 2025
+#
+# This file contains comprehensive system design documentation
+# Import this into Excel and split by sections for multiple sheets
+
+=== SYSTEM OVERVIEW ===
+Component,Type,Technology,Port,Database,Description
+API Gateway,Gateway,Spring Cloud Gateway,8080,N/A,Central entry point for all API requests
+Auth Service,Microservice,Spring Boot,8081,PostgreSQL,Authentication and authorization service
+User Service,Microservice,Spring Boot,8082,PostgreSQL,User management for patients and doctors
+Admin Service,Microservice,Spring Boot,8083,PostgreSQL,Administrative operations and verification
+Appointment Service,Microservice,Spring Boot,8084,PostgreSQL,Appointment booking and management
+Availability Service,Microservice,Spring Boot,8085,PostgreSQL,Doctor availability management
+File Service,Microservice,Spring Boot,8086,S3/LocalStack,File upload and management
+Notification Service,Microservice,Spring Boot,8087,Redis,Email and notification system
+Payment Service,Microservice,Spring Boot,8088,PostgreSQL,Payment processing with Stripe
+Prescription Service,Microservice,Spring Boot,8089,PostgreSQL,Digital prescription management
+Taxonomy Service,Microservice,Spring Boot,8090,PostgreSQL,Medical specializations and conditions
+DB Migration,Utility,Liquibase,N/A,PostgreSQL,Database schema management
+Common Module,Library,Spring Boot,N/A,N/A,Shared entities and utilities
+
+=== INFRASTRUCTURE COMPONENTS ===
+Component,Type,Image,Port,Purpose,Configuration
+PostgreSQL,Database,postgres:15-alpine,5432,Primary database,docmate_platform database
+Redis,Cache,redis:7-alpine,6379,Session management and caching,Default configuration
+LocalStack,AWS Simulation,localstack/localstack,4566,S3 simulation for development,S3 service enabled
+Prometheus,Monitoring,prom/prometheus,9090,Metrics collection,Custom configuration
+Grafana,Monitoring,grafana/grafana,3000,Metrics visualization,Admin: admin123
+
+=== API ENDPOINTS - AUTH SERVICE ===
+Method,Endpoint,Description,Request Body,Response,Authentication Required
+POST,/api/auth/register/patient,Register new patient,RegisterPatientRequest,AuthResponse,No
+POST,/api/auth/register/doctor,Register new doctor,RegisterDoctorRequest,AuthResponse,No
+POST,/api/auth/login,User login,LoginRequest,AuthResponse,No
+POST,/api/auth/logout,User logout,None,Success message,Yes
+POST,/api/auth/refresh,Refresh JWT token,Refresh token,AuthResponse,No
+POST,/api/auth/forgot-password,Request password reset,ForgotPasswordRequest,Success message,No
+POST,/api/auth/reset-password,Reset password,ResetPasswordRequest,Success message,No
+GET,/api/auth/me,Get current user info,None,UserProfileResponse,Yes
+
+=== API ENDPOINTS - USER SERVICE ===
+Method,Endpoint,Description,Request Body,Response,Authentication Required
+GET,/api/users/profile,Get user profile,None,UserProfileResponse,Yes
+PUT,/api/users/profile,Update user profile,UpdateUserProfileRequest,UserProfileResponse,Yes
+GET,/api/doctors/search,Search doctors,Query parameters,Page<DoctorSearchResponse>,No
+GET,/api/doctors/{id},Get doctor details,None,DoctorDto,No
+PUT,/api/doctors/profile,Update doctor profile,UpdateDoctorProfileRequest,DoctorDto,Yes (Doctor)
+GET,/api/doctors/stats,Get doctor statistics,None,DoctorStatsResponse,Yes (Doctor)
+GET,/api/patients/profile,Get patient profile,None,PatientDto,Yes (Patient)
+PUT,/api/patients/profile,Update patient profile,UpdatePatientProfileDto,PatientDto,Yes (Patient)
+GET,/api/patients/reports,Get patient reports,Pagination params,Page<PatientReportResponse>,Yes (Patient)
+POST,/api/patients/reports,Upload patient report,MultipartFile,PatientReportResponse,Yes (Patient)
+DELETE,/api/patients/reports/{id},Delete patient report,None,Success message,Yes (Patient)
+PUT,/api/patients/medical-history,Update medical history,UpdatePatientMedicalHistoryRequest,PatientMedicalHistoryResponse,Yes (Patient)
+
+=== API ENDPOINTS - ADMIN SERVICE ===
+Method,Endpoint,Description,Request Body,Response,Authentication Required
+GET,/api/admin/dashboard,Get dashboard statistics,None,DashboardStatsDto,Yes (Admin)
+GET,/api/admin/verifications/pending,Get pending verifications,None,List<DoctorVerificationDto>,Yes (Admin)
+GET,/api/admin/verifications/{id},Get verification details,None,DoctorVerificationDto,Yes (Admin)
+POST,/api/admin/verifications/review,Review verification,VerificationReviewRequest,Success message,Yes (Admin)
+GET,/api/admin/verifications,Get verifications by status,Status parameter,List<DoctorVerificationDto>,Yes (Admin)
+GET,/api/admin/verifications/count,Get pending count,None,Long,Yes (Admin)
+
+=== API ENDPOINTS - APPOINTMENT SERVICE ===
+Method,Endpoint,Description,Request Body,Response,Authentication Required
+POST,/api/appointments,Create appointment,CreateAppointmentRequest,AppointmentDto,Yes
+GET,/api/appointments,Get user appointments,Pagination params,Page<AppointmentDto>,Yes
+GET,/api/appointments/{id},Get appointment details,None,AppointmentDto,Yes
+PUT,/api/appointments/{id}/cancel,Cancel appointment,Cancellation reason,AppointmentDto,Yes
+GET,/api/appointments/upcoming,Get upcoming appointments,None,List<AppointmentDto>,Yes
+GET,/api/appointments/history,Get appointment history,Pagination params,Page<AppointmentDto>,Yes
+
+=== API ENDPOINTS - AVAILABILITY SERVICE ===
+Method,Endpoint,Description,Request Body,Response,Authentication Required
+POST,/api/availability/recurring,Set recurring availability,CreateAvailabilityRequest,AvailabilityDto,Yes (Doctor)
+POST,/api/availability/adhoc,Set adhoc availability,CreateAvailabilityRequest,AvailabilityDto,Yes (Doctor)
+GET,/api/availability/{doctorId},Get doctor availability,Date parameters,List<AvailabilityDto>,No
+GET,/api/availability/{doctorId}/slots,Get available time slots,Date parameters,List<TimeSlotDto>,No
+DELETE,/api/availability/{id},Delete availability,None,Success message,Yes (Doctor)
+
+=== API ENDPOINTS - FILE SERVICE ===
+Method,Endpoint,Description,Request Body,Response,Authentication Required
+POST,/api/files/upload,Upload file,MultipartFile,FileUploadResponse,Yes
+GET,/api/files/{id},Download file,None,File binary,Yes
+DELETE,/api/files/{id},Delete file,None,Success message,Yes
+GET,/api/files/user,Get user files,Pagination params,Page<FileDto>,Yes
+
+=== API ENDPOINTS - NOTIFICATION SERVICE ===
+Method,Endpoint,Description,Request Body,Response,Authentication Required
+POST,/api/notifications/send,Send notification,CreateNotificationRequest,Success message,Yes
+GET,/api/notifications,Get user notifications,Pagination params,Page<NotificationDto>,Yes
+PUT,/api/notifications/{id}/read,Mark as read,None,Success message,Yes
+DELETE,/api/notifications/{id},Delete notification,None,Success message,Yes
+GET,/api/notifications/unread-count,Get unread count,None,Long,Yes
+
+=== API ENDPOINTS - PAYMENT SERVICE ===
+Method,Endpoint,Description,Request Body,Response,Authentication Required
+POST,/api/payments/create-intent,Create payment intent,CreatePaymentRequest,PaymentIntentResponse,Yes
+POST,/api/payments/confirm,Confirm payment,ConfirmPaymentRequest,PaymentDto,Yes
+GET,/api/payments/{id},Get payment details,None,PaymentDto,Yes
+GET,/api/payments/history,Get payment history,Pagination params,Page<PaymentDto>,Yes
+POST,/api/payments/refund/{id},Request refund,Refund reason,RefundResponse,Yes
+
+=== API ENDPOINTS - PRESCRIPTION SERVICE ===
+Method,Endpoint,Description,Request Body,Response,Authentication Required
+POST,/api/prescriptions,Create prescription,CreatePrescriptionRequest,PrescriptionDto,Yes (Doctor)
+GET,/api/prescriptions/{id},Get prescription details,None,PrescriptionDto,Yes
+GET,/api/prescriptions/patient/{patientId},Get patient prescriptions,Pagination params,Page<PrescriptionDto>,Yes
+GET,/api/prescriptions/doctor,Get doctor prescriptions,Pagination params,Page<PrescriptionDto>,Yes (Doctor)
+PUT,/api/prescriptions/{id},Update prescription,UpdatePrescriptionRequest,PrescriptionDto,Yes (Doctor)
+
+=== API ENDPOINTS - TAXONOMY SERVICE ===
+Method,Endpoint,Description,Request Body,Response,Authentication Required
+GET,/api/specializations,Get all specializations,None,List<SpecializationDto>,No
+GET,/api/specializations/{id},Get specialization details,None,SpecializationDto,No
+GET,/api/conditions,Get all conditions,None,List<ConditionDto>,No
+GET,/api/conditions/{id},Get condition details,None,ConditionDto,No
+
+=== DATABASE ENTITIES ===
+Entity,Table Name,Key Relationships,Primary Purpose,Key Fields
+User,users,One-to-One with Patient/Doctor/Admin,Base user information,id email fullName role
+Patient,patients,One-to-One with User,Patient-specific data,userId dateOfBirth gender
+Doctor,doctors,One-to-One with User,Doctor-specific data,userId licenseNumber experience
+Admin,admins,One-to-One with User,Admin-specific data,userId permissions
+Address,addresses,Many-to-One with Patient/Doctor,Location information,addressLine1 city state zipCode
+Specialization,specializations,Many-to-Many with Doctor,Medical specialties,name description
+Condition,conditions,Many-to-Many with Doctor,Medical conditions,name description severity
+CommonAppointment,appointments,Many-to-One with Doctor/Patient,Appointment booking,doctorId patientId appointmentDateTime status
+TimeSlot,time_slots,Many-to-One with Doctor,Available time slots,doctorId startTime endTime status
+DoctorAvailability,doctor_availability,Many-to-One with Doctor,Doctor working hours,doctorId dayOfWeek startTime endTime
+Prescription,prescriptions,One-to-One with CommonAppointment,Digital prescriptions,appointmentId diagnosis advice
+PrescriptionMedicine,prescription_items,Many-to-One with Prescription,Prescribed medications,prescriptionId name dosage frequency
+Payment,payments,One-to-One with CommonAppointment,Payment processing,appointmentId amount status paymentMethod
+Review,reviews,One-to-One with CommonAppointment,Appointment reviews,appointmentId rating comment
+Notification,notifications,Many-to-One with User,User notifications,userId type message isRead
+PatientMedicalHistory,patient_medical_history,One-to-One with Patient,Medical history,patientId allergies chronicConditions
+PatientReport,patient_reports,Many-to-One with Patient,Medical reports,patientId title reportType uploadDate
+DoctorVerificationDocuments,doctor_verification_documents,One-to-One with Doctor,Verification docs,doctorId licenseDocument status
+AuditLog,audit_log,Many-to-One with User,System auditing,userId action entityType oldValues newValues
+
+=== DOCKER CONFIGURATION ===
+Service,Image Type,Base Image,Size Estimate,Optimization Features
+Distroless,Ultra-secure,gcr.io/distroless/java17-debian12:nonroot,~100MB,"No shell, minimal attack surface"
+Alpine,Lightweight,openjdk:17-jre-alpine,~150MB,"Shell access, small footprint"
+Minimal,Custom JRE,debian:12-slim + custom JRE,~80MB,"Custom JRE with only required modules"
+Standard,Full-featured,amazoncorretto:17-alpine,~300MB,"Full JDK with debugging capabilities"
+
+=== SECURITY CONFIGURATION ===
+Component,Authentication,Authorization,Security Features,Configuration
+API Gateway,JWT Validation,Route-based,Rate limiting CORS,Custom security filters
+Auth Service,Password + JWT,Role-based,BCrypt hashing,JWT expiration: 24h
+User Service,JWT Required,Role + Resource-based,Field-level security,Method-level authorization
+Admin Service,JWT Required,Admin role only,Audit logging,@PreAuthorize annotations
+All Services,JWT Bearer,Spring Security,HTTPS only,Non-root containers
+
+=== MONITORING AND HEALTH CHECKS ===
+Service,Health Check Endpoint,Metrics Endpoint,Monitoring Features,Alerting
+All Services,/actuator/health,/actuator/prometheus,Spring Boot Actuator,Custom metrics
+Prometheus,/metrics,/-/healthy,System metrics collection,Rule-based alerts
+Grafana,/api/health,N/A,Visualization dashboards,Dashboard alerts
+Database,pg_isready,N/A,Connection monitoring,Connection pool metrics
+Redis,redis-cli ping,N/A,Cache monitoring,Memory usage alerts
+
+=== DEPLOYMENT CONFIGURATION ===
+Environment,Configuration,Resource Limits,Scaling Strategy,Backup Strategy
+Development,docker-compose,512MB memory limit,Manual scaling,Local backups
+Staging,Kubernetes,1GB memory limit,Horizontal scaling,Daily backups
+Production,Kubernetes + Helm,2GB memory limit,Auto-scaling,Real-time replication
+
+=== API RESPONSE FORMATS ===
+Response Type,Structure,Fields,Usage,Examples
+ApiResponse<T>,Wrapper object,"success, message, data, timestamp",Standard API responses,Success/Error responses
+PageResponse<T>,Paginated data,"content, totalElements, totalPages, size",List endpoints,Search results
+AuthResponse,Authentication data,"accessToken, refreshToken, user, expiresIn",Auth endpoints,Login/Register responses
+ErrorResponse,Error details,"code, message, details, timestamp",Error handling,Validation errors
+
+=== BUSINESS RULES ===
+Domain,Rule,Implementation,Validation,Error Handling
+Authentication,JWT tokens expire in 24 hours,JWT configuration,Token validation filter,Automatic refresh
+Appointments,Cannot book past appointments,Service layer validation,@Valid annotations,BusinessException
+Payments,Refunds allowed within 7 days,Payment service logic,Business rule validation,Custom exceptions
+Prescriptions,Only doctors can create prescriptions,Security configuration,@PreAuthorize,Access denied exception
+Verification,Admins approve doctor verifications,Workflow implementation,State machine pattern,Status validation

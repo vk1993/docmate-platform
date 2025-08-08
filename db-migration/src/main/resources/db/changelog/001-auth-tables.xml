@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="001-create-docmate-users-table" author="docmate">
+        <comment>Create docmate_users table for authentication</comment>
+        <createTable tableName="docmate_users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="full_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="phone" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password_hash" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="license_number" type="VARCHAR(255)"/>
+            <column name="experience" type="INTEGER"/>
+            <column name="bio" type="TEXT"/>
+            <column name="fee" type="INTEGER"/>
+            <column name="video_consultation_enabled" type="BOOLEAN"/>
+            <column name="tele_consultation_enabled" type="BOOLEAN"/>
+            <column name="emergency_available" type="BOOLEAN"/>
+            <column name="approved" type="BOOLEAN"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

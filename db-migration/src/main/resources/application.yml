@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: db-migration
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:docmate_platform}
+    username: ${DB_USERNAME:docmate}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    default-schema: public
+    drop-first: true  # This will drop all tables and start fresh
+    enabled: true
+
+logging:
+  level:
+    liquibase: INFO
+    com.docmate.migration: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

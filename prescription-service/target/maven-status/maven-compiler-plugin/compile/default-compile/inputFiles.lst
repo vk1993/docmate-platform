@@ -1,0 +1,9 @@
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/prescription-service/src/main/java/com/docmate/prescription/mapper/PrescriptionMapper.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/prescription-service/src/main/java/com/docmate/prescription/PrescriptionServiceApplication.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/prescription-service/src/main/java/com/docmate/prescription/controller/PrescriptionController.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/prescription-service/src/main/java/com/docmate/prescription/service/PrescriptionService.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/prescription-service/src/main/java/com/docmate/prescription/repository/PrescriptionRepository.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/prescription-service/src/main/java/com/docmate/prescription/dto/PrescriptionDto.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/prescription-service/src/main/java/com/docmate/prescription/repository/PrescriptionMedicineRepository.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/prescription-service/src/main/java/com/docmate/prescription/config/SecurityConfig.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/prescription-service/src/main/java/com/docmate/prescription/dto/CreatePrescriptionRequest.java

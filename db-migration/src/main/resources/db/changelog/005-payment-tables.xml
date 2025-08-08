@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="005-create-payments-table" author="docmate">
+        <createTable tableName="payments">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="appointment_id" type="UUID"/>
+            <column name="amount" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)" defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_method" type="VARCHAR(50)"/>
+            <column name="transaction_id" type="VARCHAR(200)"/>
+            <column name="stripe_payment_intent_id" type="VARCHAR(200)"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="005-add-payment-foreign-keys" author="docmate">
+        <addForeignKeyConstraint constraintName="fk_payments_appointment"
+                                 baseTableName="payments"
+                                 baseColumnNames="appointment_id"
+                                 referencedTableName="appointments"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="005-add-payment-indexes" author="docmate">
+        <createIndex tableName="payments" indexName="idx_payments_appointment_id">
+            <column name="appointment_id"/>
+        </createIndex>
+        <createIndex tableName="payments" indexName="idx_payments_status">
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="payments" indexName="idx_payments_transaction_id">
+            <column name="transaction_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

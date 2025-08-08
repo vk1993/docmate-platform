@@ -1,0 +1,367 @@
+version: '3.8'
+
+# Environment variables for lightweight image configuration
+# Set IMAGE_TYPE=distroless|alpine|minimal|standard (default: distroless)
+# Set IMAGE_TAG=latest (default: latest)
+
+x-common-variables: &common-variables
+  IMAGE_TYPE: ${IMAGE_TYPE:-distroless}
+  IMAGE_TAG: ${IMAGE_TAG:-latest}
+
+x-service-defaults: &service-defaults
+  networks:
+    - docmate-network
+  restart: unless-stopped
+  deploy:
+    resources:
+      limits:
+        memory: 512M
+      reservations:
+        memory: 256M
+
+services:
+  # Database Migration Service
+  db-migration:
+    <<: *service-defaults
+    image: docmate/db-migration:${IMAGE_TYPE:-distroless}
+    container_name: docmate-db-migration
+    environment:
+      <<: *common-variables
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/docmate_platform
+      SPRING_DATASOURCE_USERNAME: docmate
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.xml
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # API Gateway
+  gateway:
+    <<: *service-defaults
+    image: docmate/gateway:${IMAGE_TYPE:-distroless}
+    container_name: docmate-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      <<: *common-variables
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_GATEWAY_ROUTES[0]_ID: auth-service
+      SPRING_CLOUD_GATEWAY_ROUTES[0]_URI: http://auth-service:8081
+      SPRING_CLOUD_GATEWAY_ROUTES[0]_PREDICATES[0]: Path=/api/auth/**
+    depends_on:
+      - db-migration
+
+  # Auth Service
+  auth-service:
+    <<: *service-defaults
+    image: docmate/auth-service:${IMAGE_TYPE:-distroless}
+    container_name: docmate-auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      <<: *common-variables
+      SPRING_PROFILES_ACTIVE: docker
+      PORT: 8081
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: docmate_platform
+      DB_USERNAME: docmate
+      DB_PASSWORD: password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+      - db-migration
+
+  # User Service
+  user-service:
+    <<: *service-defaults
+    image: docmate/user-service:${IMAGE_TYPE:-distroless}
+    container_name: docmate-user-service
+    ports:
+      - "8082:8082"
+    environment:
+      <<: *common-variables
+      SPRING_PROFILES_ACTIVE: docker
+      PORT: 8082
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: docmate_platform
+      DB_USERNAME: docmate
+      DB_PASSWORD: password
+    depends_on:
+      - postgres
+      - db-migration
+
+  # Admin Service
+  admin-service:
+    <<: *service-defaults
+    image: docmate/admin-service:${IMAGE_TYPE:-distroless}
+    container_name: docmate-admin-service
+    ports:
+      - "8083:8083"
+    environment:
+      <<: *common-variables
+      SPRING_PROFILES_ACTIVE: docker
+      PORT: 8083
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: docmate_platform
+      DB_USERNAME: docmate
+      DB_PASSWORD: password
+    depends_on:
+      - postgres
+      - db-migration
+
+  # Appointment Service
+  appointment-service:
+    <<: *service-defaults
+    image: docmate/appointment-service:${IMAGE_TYPE:-distroless}
+    container_name: docmate-appointment-service
+    ports:
+      - "8084:8084"
+    environment:
+      <<: *common-variables
+      SPRING_PROFILES_ACTIVE: docker
+      PORT: 8084
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: docmate_platform
+      DB_USERNAME: docmate
+      DB_PASSWORD: password
+    depends_on:
+      - postgres
+      - db-migration
+
+  # Availability Service
+  availability-service:
+    <<: *service-defaults
+    image: docmate/availability-service:${IMAGE_TYPE:-distroless}
+    container_name: docmate-availability-service
+    ports:
+      - "8085:8085"
+    environment:
+      <<: *common-variables
+      SPRING_PROFILES_ACTIVE: docker
+      PORT: 8085
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: docmate_platform
+      DB_USERNAME: docmate
+      DB_PASSWORD: password
+    depends_on:
+      - postgres
+      - db-migration
+
+  # File Service
+  file-service:
+    <<: *service-defaults
+    image: docmate/file-service:${IMAGE_TYPE:-distroless}
+    container_name: docmate-file-service
+    ports:
+      - "8086:8086"
+    environment:
+      <<: *common-variables
+      SPRING_PROFILES_ACTIVE: docker
+      PORT: 8086
+      AWS_S3_ENDPOINT: http://localstack:4566
+      AWS_S3_BUCKET: docmate-files
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+    depends_on:
+      - localstack
+
+  # Notification Service
+  notification-service:
+    <<: *service-defaults
+    image: docmate/notification-service:${IMAGE_TYPE:-distroless}
+    container_name: docmate-notification-service
+    ports:
+      - "8087:8087"
+    environment:
+      <<: *common-variables
+      SPRING_PROFILES_ACTIVE: docker
+      PORT: 8087
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+
+  # Payment Service
+  payment-service:
+    <<: *service-defaults
+    image: docmate/payment-service:${IMAGE_TYPE:-distroless}
+    container_name: docmate-payment-service
+    ports:
+      - "8088:8088"
+    environment:
+      <<: *common-variables
+      SPRING_PROFILES_ACTIVE: docker
+      PORT: 8088
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: docmate_platform
+      DB_USERNAME: docmate
+      DB_PASSWORD: password
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-sk_test_dummy}
+    depends_on:
+      - postgres
+      - db-migration
+
+  # Prescription Service
+  prescription-service:
+    <<: *service-defaults
+    image: docmate/prescription-service:${IMAGE_TYPE:-distroless}
+    container_name: docmate-prescription-service
+    ports:
+      - "8089:8089"
+    environment:
+      <<: *common-variables
+      SPRING_PROFILES_ACTIVE: docker
+      PORT: 8089
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: docmate_platform
+      DB_USERNAME: docmate
+      DB_PASSWORD: password
+    depends_on:
+      - postgres
+      - db-migration
+
+  # Taxonomy Service
+  taxonomy-service:
+    <<: *service-defaults
+    image: docmate/taxonomy-service:${IMAGE_TYPE:-distroless}
+    container_name: docmate-taxonomy-service
+    ports:
+      - "8090:8090"
+    environment:
+      <<: *common-variables
+      SPRING_PROFILES_ACTIVE: docker
+      PORT: 8090
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: docmate_platform
+      DB_USERNAME: docmate
+      DB_PASSWORD: password
+    depends_on:
+      - postgres
+      - db-migration
+
+  # Shared PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: docmate-postgres
+    environment:
+      POSTGRES_DB: docmate_platform
+      POSTGRES_USER: docmate
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - docmate-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docmate -d docmate_platform"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for Caching and Session Management
+  redis:
+    image: redis:7-alpine
+    container_name: docmate-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - docmate-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # LocalStack for AWS S3 simulation
+  localstack:
+    image: localstack/localstack:latest
+    container_name: docmate-localstack
+    ports:
+      - "4566:4566"  # LocalStack main port
+      - "4510-4559:4510-4559"  # External service ports
+    environment:
+      - SERVICES=s3
+      - DEBUG=0
+      - PERSISTENCE=1
+      - LAMBDA_EXECUTOR=docker
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - TMPDIR=/tmp
+      - DISABLE_CORS_CHECKS=1
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - docmate-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Monitoring and Management
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: docmate-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - docmate-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: docmate-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - docmate-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  localstack_data:
+    driver: local
+
+networks:
+  docmate-network:
+    driver: bridge

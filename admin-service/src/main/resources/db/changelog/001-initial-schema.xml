@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="001-create-admin-users-table" author="docmate">
+        <createTable tableName="admin_users">
+            <column name="id" type="UUID" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password_hash" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="full_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(20)" defaultValue="ADMIN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_login" type="TIMESTAMP"/>
+            <column name="created_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-create-admin-audit-logs-table" author="docmate">
+        <createTable tableName="admin_audit_logs">
+            <column name="id" type="UUID" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="admin_user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="action" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resource_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resource_id" type="VARCHAR(100)"/>
+            <column name="details" type="JSONB"/>
+            <column name="ip_address" type="VARCHAR(45)"/>
+            <column name="user_agent" type="TEXT"/>
+            <column name="timestamp" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-create-system-settings-table" author="docmate">
+        <createTable tableName="system_settings">
+            <column name="id" type="UUID" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="setting_key" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="setting_value" type="TEXT"/>
+            <column name="description" type="TEXT"/>
+            <column name="data_type" type="VARCHAR(20)" defaultValue="STRING">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_encrypted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-add-foreign-keys" author="docmate">
+        <addForeignKeyConstraint
+                baseTableName="admin_audit_logs"
+                baseColumnNames="admin_user_id"
+                referencedTableName="admin_users"
+                referencedColumnNames="id"
+                constraintName="fk_audit_logs_admin_user"/>
+    </changeSet>
+
+    <changeSet id="005-create-indexes" author="docmate">
+        <createIndex tableName="admin_audit_logs" indexName="idx_audit_logs_admin_user_id">
+            <column name="admin_user_id"/>
+        </createIndex>
+        <createIndex tableName="admin_audit_logs" indexName="idx_audit_logs_timestamp">
+            <column name="timestamp"/>
+        </createIndex>
+        <createIndex tableName="admin_audit_logs" indexName="idx_audit_logs_action">
+            <column name="action"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

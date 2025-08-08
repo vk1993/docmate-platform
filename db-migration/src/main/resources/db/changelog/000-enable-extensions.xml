@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="000-enable-uuid-extension" author="docmate">
+        <comment>Enable UUID extension for PostgreSQL</comment>
+        <sql>CREATE EXTENSION IF NOT EXISTS "uuid-ossp";</sql>
+    </changeSet>
+
+    <changeSet id="000-enable-pg-trgm-extension" author="docmate">
+        <comment>Enable pg_trgm extension for text search capabilities</comment>
+        <sql>CREATE EXTENSION IF NOT EXISTS "pg_trgm";</sql>
+    </changeSet>
+
+    <changeSet id="000-enable-btree-gist-extension" author="docmate">
+        <comment>Enable btree_gist extension for additional index types</comment>
+        <sql>CREATE EXTENSION IF NOT EXISTS "btree_gist";</sql>
+    </changeSet>
+
+</databaseChangeLog>

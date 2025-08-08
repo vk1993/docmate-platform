@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="020-create-performance-indexes" author="docmate">
+        <comment>Create indexes for optimal query performance</comment>
+
+        <!-- User authentication indexes -->
+        <createIndex tableName="users" indexName="idx_users_email">
+            <column name="email"/>
+        </createIndex>
+        <createIndex tableName="users" indexName="idx_users_role">
+            <column name="role"/>
+        </createIndex>
+        <createIndex tableName="users" indexName="idx_users_active">
+            <column name="is_active"/>
+        </createIndex>
+
+        <!-- Patient/Doctor indexes - these tables use id that references users.id -->
+        <createIndex tableName="patients" indexName="idx_patients_address_id">
+            <column name="address_id"/>
+        </createIndex>
+        <createIndex tableName="doctors" indexName="idx_doctors_specialization_id">
+            <column name="specialization_id"/>
+        </createIndex>
+        <createIndex tableName="doctors" indexName="idx_doctors_approved">
+            <column name="is_approved"/>
+        </createIndex>
+        <createIndex tableName="doctors" indexName="idx_doctors_active">
+            <column name="is_active"/>
+        </createIndex>
+
+        <!-- Appointment indexes -->
+        <createIndex tableName="appointments" indexName="idx_appointments_patient_id">
+            <column name="patient_id"/>
+        </createIndex>
+        <createIndex tableName="appointments" indexName="idx_appointments_doctor_id">
+            <column name="doctor_id"/>
+        </createIndex>
+        <createIndex tableName="appointments" indexName="idx_appointments_date_time">
+            <column name="appointment_date_time"/>
+        </createIndex>
+        <createIndex tableName="appointments" indexName="idx_appointments_status">
+            <column name="status"/>
+        </createIndex>
+
+        <!-- Note: Payment indexes are already created in 005-payment-tables.xml -->
+        <!-- Note: Other table indexes are created in their respective migration files -->
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,84 @@
+# Ultra-Minimal Production Dockerfile using JLink Custom JRE
+# This creates the smallest possible images (~80MB) by building a custom JRE
+
+# Build stage with JLink custom JRE creation
+FROM maven:3.8.5-openjdk-17 AS jre-build
+
+# Create a custom JRE with only required modules
+RUN jlink \
+    --add-modules java.base,java.logging,java.xml,java.desktop,java.management,java.naming,java.net.http,java.security.jgss,java.instrument \
+    --strip-debug \
+    --no-man-pages \
+    --no-header-files \
+    --compress=2 \
+    --output /customjre
+
+# Application build stage
+FROM maven:3.8.5-openjdk-17-slim AS build
+
+WORKDIR /app
+
+# Copy and cache dependencies
+COPY pom.xml .
+COPY common/pom.xml ./common/
+COPY gateway/pom.xml ./gateway/
+COPY db-migration/pom.xml ./db-migration/
+COPY admin-service/pom.xml ./admin-service/
+COPY auth-service/pom.xml ./auth-service/
+COPY user-service/pom.xml ./user-service/
+COPY appointment-service/pom.xml ./appointment-service/
+COPY availability-service/pom.xml ./availability-service/
+COPY file-service/pom.xml ./file-service/
+COPY notification-service/pom.xml ./notification-service/
+COPY payment-service/pom.xml ./payment-service/
+COPY prescription-service/pom.xml ./prescription-service/
+COPY taxonomy-service/pom.xml ./taxonomy-service/
+
+# Download dependencies first (cached layer)
+RUN mvn dependency:go-offline -DexcludeGroupIds=com.docmate || true
+
+# Copy source and build
+COPY . .
+ARG SERVICE_NAME
+RUN mvn clean package -pl ${SERVICE_NAME} -am -DskipTests
+
+# Final runtime stage - minimal base image
+FROM debian:12-slim
+
+# Copy custom JRE
+COPY --from=jre-build /customjre /opt/jre
+
+# Install minimal runtime dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    # Create non-root user
+    groupadd -r appuser && useradd -r -g appuser appuser
+
+WORKDIR /app
+
+# Copy application
+ARG SERVICE_NAME
+COPY --from=build /app/${SERVICE_NAME}/target/${SERVICE_NAME}-*.jar app.jar
+
+RUN chown -R appuser:appuser /app
+
+USER appuser
+
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# Use custom JRE
+ENTRYPOINT ["/opt/jre/bin/java", \
+    "-XX:+UseContainerSupport", \
+    "-XX:MaxRAMPercentage=75.0", \
+    "-XX:+UseG1GC", \
+    "-XX:+UseStringDeduplication", \
+    "-XX:+UseCompressedOops", \
+    "-jar", "app.jar"]

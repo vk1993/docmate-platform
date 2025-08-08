@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="001-create-addresses-table" author="docmate">
+        <createTable tableName="addresses">
+            <column name="id" type="UUID" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="address_line1" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_line2" type="VARCHAR(255)"/>
+            <column name="city" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="postal_code" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-create-patients-table" author="docmate">
+        <createTable tableName="patients">
+            <column name="id" type="UUID" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="address_id" type="UUID"/>
+            <column name="date_of_birth" type="DATE"/>
+            <column name="gender" type="VARCHAR(10)"/>
+            <column name="blood_group" type="VARCHAR(5)"/>
+            <column name="height" type="DECIMAL(5,2)"/>
+            <column name="weight" type="DECIMAL(5,2)"/>
+            <column name="allergies" type="TEXT"/>
+            <column name="medical_conditions" type="TEXT"/>
+            <column name="emergency_contact_name" type="VARCHAR(100)"/>
+            <column name="emergency_contact_phone" type="VARCHAR(15)"/>
+            <column name="created_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-create-doctors-table" author="docmate">
+        <createTable tableName="doctors">
+            <column name="id" type="UUID" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="address_id" type="UUID"/>
+            <column name="license_number" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="specialization" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="qualification" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="experience_years" type="INTEGER"/>
+            <column name="consultation_fee" type="DECIMAL(10,2)"/>
+            <column name="bio" type="TEXT"/>
+            <column name="is_verified" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_available" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-add-foreign-keys" author="docmate">
+        <addForeignKeyConstraint
+                baseTableName="patients"
+                baseColumnNames="address_id"
+                referencedTableName="addresses"
+                referencedColumnNames="id"
+                constraintName="fk_patients_address"/>
+
+        <addForeignKeyConstraint
+                baseTableName="doctors"
+                baseColumnNames="address_id"
+                referencedTableName="addresses"
+                referencedColumnNames="id"
+                constraintName="fk_doctors_address"/>
+    </changeSet>
+
+    <changeSet id="005-create-indexes" author="docmate">
+        <createIndex tableName="patients" indexName="idx_patients_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="doctors" indexName="idx_doctors_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="doctors" indexName="idx_doctors_specialization">
+            <column name="specialization"/>
+        </createIndex>
+        <createIndex tableName="doctors" indexName="idx_doctors_license">
+            <column name="license_number"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

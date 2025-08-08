@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="015-create-doctor-availability-table" author="docmate">
+        <createTable tableName="doctor_availability">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="doctor_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="day_of_week" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time" type="TIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_time" type="TIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="capacity" type="INTEGER" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="slot_duration_minutes" type="INTEGER" defaultValueNumeric="30">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)" defaultValue="AVAILABLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_recurring" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="effective_from" type="DATE"/>
+            <column name="effective_until" type="DATE"/>
+            <column name="notes" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="015-create-time-slots-table" author="docmate">
+        <createTable tableName="time_slots">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="doctor_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)" defaultValue="AVAILABLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="appointment_id" type="UUID"/>
+            <column name="is_emergency_slot" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="notes" type="TEXT"/>
+            <column name="blocked_reason" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="015-add-availability-foreign-keys" author="docmate">
+        <addForeignKeyConstraint constraintName="fk_doctor_availability_doctor"
+                                 baseTableName="doctor_availability"
+                                 baseColumnNames="doctor_id"
+                                 referencedTableName="doctors"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint constraintName="fk_time_slots_doctor"
+                                 baseTableName="time_slots"
+                                 baseColumnNames="doctor_id"
+                                 referencedTableName="doctors"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint constraintName="fk_time_slots_appointment"
+                                 baseTableName="time_slots"
+                                 baseColumnNames="appointment_id"
+                                 referencedTableName="appointments"
+                                 referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+    </changeSet>
+
+    <changeSet id="015-add-availability-indexes" author="docmate">
+        <createIndex tableName="doctor_availability" indexName="idx_doctor_availability_doctor_id">
+            <column name="doctor_id"/>
+        </createIndex>
+        <createIndex tableName="doctor_availability" indexName="idx_doctor_availability_day">
+            <column name="day_of_week"/>
+        </createIndex>
+        <createIndex tableName="time_slots" indexName="idx_time_slots_doctor_id">
+            <column name="doctor_id"/>
+        </createIndex>
+        <createIndex tableName="time_slots" indexName="idx_time_slots_status">
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="time_slots" indexName="idx_time_slots_appointment_id">
+            <column name="appointment_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

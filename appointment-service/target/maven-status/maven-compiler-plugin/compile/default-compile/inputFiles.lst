@@ -1,0 +1,14 @@
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/repository/AppointmentRepository.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/controller/AppointmentController.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/config/SecurityConfig.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/AppointmentServiceApplication.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/dto/PatientSummaryDto.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/dto/DoctorSummaryDto.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/service/PatientService.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/dto/CreateAppointmentRequest.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/dto/AppointmentDto.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/mapper/AppointmentMapper.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/service/AvailabilityService.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/service/AppointmentService.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/entity/Appointment.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/appointment-service/src/main/java/com/docmate/appointment/service/DoctorService.java

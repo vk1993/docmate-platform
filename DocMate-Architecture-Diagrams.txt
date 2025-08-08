@@ -1,0 +1,210 @@
+# DocMate Platform - System Architecture Diagram
+# This file provides ASCII-based system architecture visualization
+# Import into Excel and use drawing tools to create visual diagrams
+
+=== HIGH-LEVEL SYSTEM ARCHITECTURE ===
+
+                                    ┌─────────────────┐
+                                    │   Mobile App    │
+                                    │   Web Client    │
+                                    └─────────┬───────┘
+                                              │
+                                              │ HTTPS/REST
+                                              ▼
+                    ┌─────────────────────────────────────────────────┐
+                    │            API Gateway (Port 8080)              │
+                    │         Spring Cloud Gateway                    │
+                    │    ┌─────────────┐  ┌─────────────┐            │
+                    │    │Rate Limiting│  │Load Balancer│            │
+                    │    └─────────────┘  └─────────────┘            │
+                    └─────────────────┬───────────────────────────────┘
+                                      │
+                    ┌─────────────────┼───────────────────────────────┐
+                    │                 │                               │
+            ┌───────▼────────┐ ┌─────▼──────┐ ┌──────▼───────┐     │
+            │  Auth Service  │ │User Service│ │Admin Service │     │
+            │   Port 8081    │ │ Port 8082  │ │  Port 8083   │     │
+            └────────────────┘ └────────────┘ └──────────────┘     │
+                    │                 │                               │
+            ┌───────▼────────┐ ┌─────▼──────┐ ┌──────▼───────┐     │
+            │Appointment Svc │ │Availability│ │ File Service │     │
+            │   Port 8084    │ │ Port 8085  │ │  Port 8086   │     │
+            └────────────────┘ └────────────┘ └──────────────┘     │
+                    │                 │                               │
+            ┌───────▼────────┐ ┌─────▼──────┐ ┌──────▼───────┐     │
+            │Notification    │ │Payment Svc │ │Prescription  │     │
+            │   Port 8087    │ │ Port 8088  │ │  Port 8089   │     │
+            └────────────────┘ └────────────┘ └──────────────┘     │
+                    │                 │                               │
+                    └─────────────────┼──────────────────────▼───────┘
+                                      │                  ┌──────────────┐
+                                      │                  │Taxonomy Svc  │
+                                      │                  │ Port 8090    │
+                                      │                  └──────────────┘
+                                      │
+        ┌─────────────────────────────┼─────────────────────────────┐
+        │                             │                             │
+        ▼                             ▼                             ▼
+┌─────────────┐              ┌─────────────┐              ┌─────────────┐
+│ PostgreSQL  │              │    Redis    │              │ LocalStack  │
+│ Port 5432   │              │  Port 6379  │              │ Port 4566   │
+│(Primary DB) │              │  (Cache)    │              │ (S3 Mock)   │
+└─────────────┘              └─────────────┘              └─────────────┘
+
+=== SERVICE INTERACTION MATRIX ===
+
+Service,Auth,User,Admin,Appointment,Availability,File,Notification,Payment,Prescription,Taxonomy
+Auth Service,SELF,Provides JWT,Provides JWT,Provides JWT,Provides JWT,Provides JWT,Provides JWT,Provides JWT,Provides JWT,Provides JWT
+User Service,Validates JWT,SELF,N/A,User Data,User Data,User Files,User Profile,User Data,User Data,User Prefs
+Admin Service,Validates JWT,Admin Ops,SELF,Admin Ops,Admin Ops,Admin Ops,Admin Notif,Admin Reports,Admin Ops,Admin Ops
+Appointment,Validates JWT,Patient/Doctor,Admin View,SELF,Check Slots,Appt Files,Appt Notif,Appt Payment,Appt Prescription,N/A
+Availability,Validates JWT,Doctor Profile,Admin View,Slot Booking,SELF,N/A,Availability Notif,N/A,N/A,N/A
+File Service,Validates JWT,User Files,Admin Files,Appt Files,N/A,SELF,File Notif,Receipt Files,Prescription Files,N/A
+Notification,Validates JWT,User Notif,Admin Notif,Appt Notif,Avail Notif,File Notif,SELF,Payment Notif,Prescription Notif,N/A
+Payment,Validates JWT,User Payments,Admin Reports,Appt Payment,N/A,Receipt Files,Payment Notif,SELF,N/A,N/A
+Prescription,Validates JWT,Patient Rx,Admin View,Prescription,N/A,Rx Files,Rx Notif,N/A,SELF,Drug Info
+Taxonomy,No Auth,Specializations,Admin Manage,N/A,N/A,N/A,N/A,N/A,Drug Database,SELF
+
+=== DATA FLOW DIAGRAMS ===
+
+PATIENT REGISTRATION FLOW:
+┌─────────┐    ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│ Patient │───▶│ Auth Service│───▶│ User Service │───▶│ PostgreSQL  │
+│ Request │    │   (8081)    │    │   (8082)     │    │   Database  │
+└─────────┘    └─────────────┘    └──────────────┘    └─────────────┘
+                       │                   │
+                       ▼                   ▼
+               ┌─────────────┐    ┌──────────────┐
+               │ JWT Token   │    │ Notification │
+               │ Generated   │    │ Service (8087)│
+               └─────────────┘    └──────────────┘
+
+APPOINTMENT BOOKING FLOW:
+┌─────────┐    ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│ Patient │───▶│Availability │───▶│ Appointment  │───▶│ Payment     │
+│ Request │    │Svc (8085)   │    │ Svc (8084)   │    │ Svc (8088)  │
+└─────────┘    └─────────────┘    └──────────────┘    └─────────────┘
+                       │                   │                   │
+                       ▼                   ▼                   ▼
+               ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+               │ Check Slots │    │ Create Appt  │    │ Process     │
+               │ Available   │    │ Record       │    │ Payment     │
+               └─────────────┘    └──────────────┘    └─────────────┘
+
+DOCTOR VERIFICATION FLOW:
+┌─────────┐    ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│ Doctor  │───▶│ User Service│───▶│ File Service │───▶│ Admin       │
+│Submits  │    │   (8082)    │    │   (8086)     │    │ Service     │
+└─────────┘    └─────────────┘    └──────────────┘    └─────────────┘
+                       │                   │                   │
+                       ▼                   ▼                   ▼
+               ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+               │ Create      │    │ Store        │    │ Admin       │
+               │ Verification│    │ Documents    │    │ Review      │
+               └─────────────┘    └──────────────┘    └─────────────┘
+
+=== SECURITY ARCHITECTURE ===
+
+                    ┌─────────────────────────────────┐
+                    │          Internet               │
+                    └─────────────┬───────────────────┘
+                                  │ HTTPS/TLS
+                                  ▼
+                    ┌─────────────────────────────────┐
+                    │         API Gateway             │
+                    │    ┌─────────────────────────┐  │
+                    │    │    Rate Limiting        │  │
+                    │    │    CORS Configuration   │  │
+                    │    │    Request Validation   │  │
+                    │    └─────────────────────────┘  │
+                    └─────────────┬───────────────────┘
+                                  │ JWT Validation
+                                  ▼
+                    ┌─────────────────────────────────┐
+                    │      Microservices Layer       │
+                    │  ┌─────────────────────────────┐ │
+                    │  │  Spring Security Config     │ │
+                    │  │  @PreAuthorize Annotations  │ │
+                    │  │  Method-level Security      │ │
+                    │  │  Role-based Access Control  │ │
+                    │  └─────────────────────────────┘ │
+                    └─────────────┬───────────────────┘
+                                  │ Encrypted
+                                  ▼
+                    ┌─────────────────────────────────┐
+                    │        Data Layer               │
+                    │  ┌─────────────────────────────┐ │
+                    │  │  Database Encryption        │ │
+                    │  │  Connection Pooling         │ │
+                    │  │  Audit Logging              │ │
+                    │  │  Backup Encryption          │ │
+                    │  └─────────────────────────────┘ │
+                    └─────────────────────────────────┘
+
+=== MONITORING ARCHITECTURE ===
+
+    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+    │Auth Service │    │User Service │    │Admin Service│
+    │   :8081     │    │   :8082     │    │   :8083     │
+    └──────┬──────┘    └──────┬──────┘    └──────┬──────┘
+           │                  │                  │
+           │ /actuator/       │ /actuator/       │ /actuator/
+           │ prometheus       │ prometheus       │ prometheus
+           │                  │                  │
+           └──────────────────┼──────────────────┘
+                              │
+                              ▼
+                    ┌─────────────────┐
+                    │   Prometheus    │
+                    │    :9090        │
+                    │  ┌─────────────┐│
+                    │  │Metrics      ││
+                    │  │Collection   ││
+                    │  │Rules Engine ││
+                    │  │Alerting     ││
+                    │  └─────────────┘│
+                    └─────────┬───────┘
+                              │
+                              ▼
+                    ┌─────────────────┐
+                    │    Grafana      │
+                    │     :3000       │
+                    │  ┌─────────────┐│
+                    │  │Dashboards   ││
+                    │  │Visualizations││
+                    │  │Alerts       ││
+                    │  │Reports      ││
+                    │  └─────────────┘│
+                    └─────────────────┘
+
+=== DEPLOYMENT ARCHITECTURE ===
+
+DEVELOPMENT ENVIRONMENT:
+┌─────────────────────────────────────────────────────────────┐
+│                    Docker Compose                           │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │   Service   │  │   Service   │  │   Service   │        │
+│  │ Container 1 │  │ Container 2 │  │ Container 3 │   ...  │
+│  └─────────────┘  └─────────────┘  └─────────────┘        │
+│                                                             │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │ PostgreSQL  │  │    Redis    │  │ LocalStack  │        │
+│  │ Container   │  │ Container   │  │ Container   │        │
+│  └─────────────┘  └─────────────┘  └─────────────┘        │
+└─────────────────────────────────────────────────────────────┘
+
+PRODUCTION ENVIRONMENT:
+┌─────────────────────────────────────────────────────────────┐
+│                    Kubernetes Cluster                       │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │  Service    │  │  Service    │  │  Service    │        │
+│  │   Pod 1     │  │   Pod 2     │  │   Pod 3     │   ...  │
+│  │ (Multiple   │  │ (Multiple   │  │ (Multiple   │        │
+│  │ Replicas)   │  │ Replicas)   │  │ Replicas)   │        │
+│  └─────────────┘  └─────────────┘  └─────────────┘        │
+│                                                             │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │   RDS       │  │   ElastiCache│  │    S3       │        │
+│  │ PostgreSQL  │  │    Redis    │  │  Storage    │        │
+│  └─────────────┘  └─────────────┘  └─────────────┘        │
+└─────────────────────────────────────────────────────────────┘

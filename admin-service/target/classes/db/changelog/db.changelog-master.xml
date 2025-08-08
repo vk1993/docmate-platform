@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <!-- Admin Service Database Changes -->
+    <!-- 
+        This is the master changelog file for admin-service.
+        Add individual changelog files below as your database schema evolves.
+        
+        Example structure:
+        <include file="db/changelog/001-create-admin-tables.xml"/>
+        <include file="db/changelog/002-add-audit-columns.xml"/>
+        <include file="db/changelog/003-create-indexes.xml"/>
+    -->
+    
+    <!-- Uncomment and add actual changelog files as needed -->
+    <include file="db/changelog/001-initial-schema.xml"/>
+
+</databaseChangeLog>

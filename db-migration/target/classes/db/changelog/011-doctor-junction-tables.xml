@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="011-create-conditions-table" author="docmate">
+        <createTable tableName="conditions">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="011-create-doctor-specializations-table" author="docmate">
+        <createTable tableName="doctor_specializations">
+            <column name="doctor_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="specialization_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="doctor_specializations" columnNames="doctor_id,specialization_id"/>
+    </changeSet>
+
+    <changeSet id="011-create-doctor-conditions-table" author="docmate">
+        <createTable tableName="doctor_conditions">
+            <column name="doctor_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="condition_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="doctor_conditions" columnNames="doctor_id,condition_id"/>
+    </changeSet>
+
+    <changeSet id="011-add-junction-table-foreign-keys" author="docmate">
+        <addForeignKeyConstraint constraintName="fk_doctor_specializations_doctor"
+                                 baseTableName="doctor_specializations"
+                                 baseColumnNames="doctor_id"
+                                 referencedTableName="doctors"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint constraintName="fk_doctor_specializations_specialization"
+                                 baseTableName="doctor_specializations"
+                                 baseColumnNames="specialization_id"
+                                 referencedTableName="specializations"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint constraintName="fk_doctor_conditions_doctor"
+                                 baseTableName="doctor_conditions"
+                                 baseColumnNames="doctor_id"
+                                 referencedTableName="doctors"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint constraintName="fk_doctor_conditions_condition"
+                                 baseTableName="doctor_conditions"
+                                 baseColumnNames="condition_id"
+                                 referencedTableName="conditions"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

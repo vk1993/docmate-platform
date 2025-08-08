@@ -1,0 +1,60 @@
+# Docker ignore file for DocMate Platform
+# This significantly improves build performance by excluding unnecessary files
+
+# Build artifacts
+**/target/
+**/build/
+**/*.jar
+**/*.war
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Version control
+.git/
+.gitignore
+
+# Logs
+**/*.log
+**/logs/
+
+# Temporary files
+**/tmp/
+**/temp/
+**/.tmp/
+
+# Node modules (if any frontend)
+**/node_modules/
+**/npm-debug.log*
+
+# Maven/Gradle
+.m2/
+.gradle/
+
+# Environment files (keep only .env.example)
+.env
+.env.local
+.env.production
+
+# Documentation
+docs/
+
+# Test files
+**/src/test/
+
+# Generated files
+**/generated-sources/
+**/generated-test-sources/
+
+# Keep only what's needed for build
+!src/main/java/
+!src/main/resources/
+!pom.xml

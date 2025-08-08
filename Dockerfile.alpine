@@ -1,0 +1,80 @@
+# Alpine-based Lightweight Dockerfile
+# This reduces image size to ~150MB while keeping shell access
+
+# Build stage - Use Alpine-based Maven (corrected image tag)
+FROM maven:3.8.5-openjdk-17-slim AS build
+
+WORKDIR /app
+
+# Copy dependency files first for better caching
+COPY pom.xml .
+COPY */pom.xml ./
+
+# Create directory structure and copy pom files
+RUN mkdir -p common gateway db-migration admin-service auth-service user-service \
+    appointment-service availability-service file-service notification-service \
+    payment-service prescription-service taxonomy-service
+
+COPY common/pom.xml ./common/
+COPY gateway/pom.xml ./gateway/
+COPY db-migration/pom.xml ./db-migration/
+COPY admin-service/pom.xml ./admin-service/
+COPY auth-service/pom.xml ./auth-service/
+COPY user-service/pom.xml ./user-service/
+COPY appointment-service/pom.xml ./appointment-service/
+COPY availability-service/pom.xml ./availability-service/
+COPY file-service/pom.xml ./file-service/
+COPY notification-service/pom.xml ./notification-service/
+COPY payment-service/pom.xml ./payment-service/
+COPY prescription-service/pom.xml ./prescription-service/
+COPY taxonomy-service/pom.xml ./taxonomy-service/
+
+# Download dependencies only
+RUN mvn dependency:go-offline -DexcludeGroupIds=com.docmate || true
+
+# Copy source code
+COPY . .
+
+# Build the specific service
+ARG SERVICE_NAME
+RUN mvn clean package -pl ${SERVICE_NAME} -am -DskipTests && \
+    # Extract JAR layers for better caching
+    java -Djarmode=layertools -jar ${SERVICE_NAME}/target/${SERVICE_NAME}-*.jar extract
+
+# Runtime stage - Use JRE Alpine (smaller than full JDK)
+FROM openjdk:17-jre-alpine
+
+# Install only essential packages
+RUN apk add --no-cache \
+    curl \
+    tzdata && \
+    # Create non-root user
+    addgroup -g 1001 -S appuser && \
+    adduser -u 1001 -S appuser -G appuser
+
+WORKDIR /app
+
+# Copy JAR layers (Spring Boot layered approach)
+COPY --from=build dependencies/ ./
+COPY --from=build snapshot-dependencies/ ./
+COPY --from=build spring-boot-loader/ ./
+COPY --from=build application/ ./
+
+# Change ownership
+RUN chown -R appuser:appuser /app
+
+USER appuser
+
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# Use Spring Boot launcher for better performance
+ENTRYPOINT ["java", \
+    "-XX:+UseContainerSupport", \
+    "-XX:MaxRAMPercentage=75.0", \
+    "-XX:+UseG1GC", \
+    "-XX:+UseStringDeduplication", \
+    "org.springframework.boot.loader.launch.JarLauncher"]

@@ -1,0 +1,7 @@
+com/docmate/file/controller/FileController.class
+com/docmate/file/dto/FileUploadResponse.class
+com/docmate/file/service/FileService.class
+com/docmate/file/dto/FileUploadResponse$FileUploadResponseBuilder.class
+com/docmate/file/config/SecurityConfig.class
+com/docmate/file/FileServiceApplication.class
+com/docmate/file/config/AwsS3Config.class

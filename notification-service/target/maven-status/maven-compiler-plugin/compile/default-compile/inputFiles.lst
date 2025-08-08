@@ -1,0 +1,12 @@
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/notification-service/src/main/java/com/docmate/notification/mapper/NotificationMapper.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/notification-service/src/main/java/com/docmate/notification/service/UserService.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/notification-service/src/main/java/com/docmate/notification/controller/NotificationController.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/notification-service/src/main/java/com/docmate/notification/service/SmsService.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/notification-service/src/main/java/com/docmate/notification/service/NotificationService.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/notification-service/src/main/java/com/docmate/notification/dto/NotificationDto.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/notification-service/src/main/java/com/docmate/notification/repository/NotificationRepository.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/notification-service/src/main/java/com/docmate/notification/service/EmailService.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/notification-service/src/main/java/com/docmate/notification/controller/EmailNotificationController.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/notification-service/src/main/java/com/docmate/notification/NotificationServiceApplication.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/notification-service/src/main/java/com/docmate/notification/dto/CreateNotificationRequest.java
+/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/notification-service/src/main/java/com/docmate/notification/config/SecurityConfig.java
