@@ -1,3 +1,0 @@
-com/docmate/gateway/GatewayApplication.class
-com/docmate/gateway/filter/JwtAuthenticationFilter.class
-com/docmate/gateway/filter/JwtAuthenticationFilter$Config.class
