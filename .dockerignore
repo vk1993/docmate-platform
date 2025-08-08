@@ -1,28 +1,39 @@
 # Docker ignore file for DocMate Platform
-# This significantly improves build performance by excluding unnecessary files
+# This only affects Docker build context, NOT Git commits
+# Git uses .gitignore, Docker uses .dockerignore
 
-# Build artifacts
-**/target/
-**/build/
-**/*.jar
-**/*.war
+# Build artifacts that slow down Docker builds
+**/target/classes/
+**/target/test-classes/
+**/target/maven-status/
+**/target/maven-archiver/
+**/target/generated-sources/
+**/target/generated-test-sources/
+**/target/surefire-reports/
 
-# IDE files
+# Keep JAR files but exclude backup files
+**/target/*.jar.original
+
+# IDE files (not needed in Docker)
 .idea/
 .vscode/
 *.iml
 *.ipr
 *.iws
+.project
+.classpath
+.settings/
 
 # OS files
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
 
-# Version control
+# Git directory (large and not needed in container)
 .git/
-.gitignore
 
-# Logs
+# Logs (not needed in container)
 **/*.log
 **/logs/
 
@@ -31,30 +42,29 @@ Thumbs.db
 **/temp/
 **/.tmp/
 
-# Node modules (if any frontend)
+# Node modules (if any)
 **/node_modules/
 **/npm-debug.log*
 
-# Maven/Gradle
+# Maven local repository cache
 .m2/
 .gradle/
 
-# Environment files (keep only .env.example)
-.env
-.env.local
-.env.production
+# Test files (not needed in production container)
+**/src/test/java/
 
-# Documentation
+# Large archives
+*.zip
+*.tar.gz
+*.tar.bz2
+
 docs/
+# IMPORTANT: Do NOT exclude documentation or Docker files
+# These should be available in Git but not needed in Docker build context
+# However, removing them here would also remove them from Git, which we don't want
 
-# Test files
-**/src/test/
-
-# Generated files
-**/generated-sources/
-**/generated-test-sources/
-
-# Keep only what's needed for build
-!src/main/java/
-!src/main/resources/
-!pom.xml
+# Only exclude from Docker build what we absolutely don't need:
+# - Compiled classes (we use JARs instead)
+# - Test code (not needed in production)
+# - IDE configuration
+# - Build artifacts that are regenerated
