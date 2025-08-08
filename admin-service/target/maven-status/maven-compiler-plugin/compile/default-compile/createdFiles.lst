@@ -1,8 +1,0 @@
-com/docmate/admin/controller/AdminVerificationController.class
-com/docmate/admin/service/AdminDashboardService.class
-com/docmate/admin/dto/DashboardStatsDto.class
-com/docmate/admin/dto/DashboardStatsDto$DashboardStatsDtoBuilder.class
-com/docmate/admin/controller/AdminController.class
-com/docmate/admin/config/SecurityConfig.class
-com/docmate/admin/service/AdminVerificationService.class
-com/docmate/admin/AdminServiceApplication.class
