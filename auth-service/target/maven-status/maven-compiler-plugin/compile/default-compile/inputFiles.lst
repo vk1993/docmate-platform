@@ -1,8 +1,0 @@
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/auth-service/src/main/java/com/docmate/auth/controller/AuthController.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/auth-service/src/main/java/com/docmate/auth/AuthServiceApplication.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/auth-service/src/main/java/com/docmate/auth/service/AuthService.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/auth-service/src/main/java/com/docmate/auth/repository/UserRepository.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/auth-service/src/main/java/com/docmate/auth/entity/DocmateUser.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/auth-service/src/main/java/com/docmate/auth/config/SecurityConfig.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/auth-service/src/main/java/com/docmate/auth/service/UserMappingService.java
-/Users/turbo/Developer/Intellij IDEA/New Backend/docmate-platform/auth-service/src/main/java/com/docmate/auth/repository/DocmateUserRepository.java
